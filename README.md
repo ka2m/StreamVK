@@ -1,7 +1,9 @@
 StreamVK
 ========
 
-StreamVK - a python-based GUI Player for vk.com. Current version is updating working concept. I plan to finish it in the middle of June.
+StreamVK - a python-based GUI Player for vk.com. Current version is updating working concept. 
+
+Finishing - middle of June
 
 Provided AS IS, source code without any installation programs yet.
 
