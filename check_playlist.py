@@ -16,7 +16,6 @@ def Check(path):
 			playlist.append((str(splitted_line[0]),str(splitted_line[1]),str(splitted_line[2]),str(splitted_line[3])))
 		except:
 			raise RuntimeError("Wront file identation")
-	print playlist
 	return playlist
 
 
