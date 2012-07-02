@@ -1,0 +1,19 @@
+StreamVK
+Current: [0.3.1/BETA]
+Version LIST:
+0.1 ---- StreamVK using PyCurses non-GUI [dead]
+0.2 ---- StreamVK based on C++ with ncurses [dead]
+0.3 BETA StreamVK using wxPython and GStreamer [current]
+Bug - not abs.location of favicon
+Bug - gstreamer exit is not correct
+ToDo - volume slider
+ToDo - working length function
+ToDo - seek function (probably)
+ToDo - ADD downloading fucntion (save a song, like GrabVK, previous project)
+0.3.1   StreamVK first stable release [plan]
+ToDo - add search/play function 
+ToDo - make the search result transferable to playlist 
+0.4 [plan]
+ToDo - playlist editor
+ToDo - search in current playlist
+0.5 [plan]

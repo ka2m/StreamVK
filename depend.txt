@@ -1,0 +1,52 @@
+Based on sfood:
+ka2m@pydev:~/Python/svk-testing$ sfood
+WARNING     : Searching for files from current directory.
+WARNING     : Directory '/home/ka2m/Python/svk-testing' does live or include any roots.
+WARNING     :     Line 4: Could not import module 'wxPython.wx'
+WARNING     : 
+WARNING     : Modules that could not be imported:
+WARNING     :   wxPython.wx
+(('/home/ka2m/Python/svk-testing', 'check_id.py'), (None, None))
+(('/home/ka2m/Python/svk-testing', 'check_id.py'), ('/home/ka2m/Python/svk-testing', 'vkauth2.py'))
+(('/home/ka2m/Python/svk-testing', 'check_playlist.py'), (None, None))
+(('/home/ka2m/Python/svk-testing', 'check_playlist.py'), ('/usr/lib/python2.7', 'os.py'))
+(('/home/ka2m/Python/svk-testing', 'cleaner.py'), (None, None))
+(('/home/ka2m/Python/svk-testing', 'cleaner.py'), ('/usr/lib/python2.7', 'os.py'))
+(('/home/ka2m/Python/svk-testing', 'getsongs.py'), (None, None))
+(('/home/ka2m/Python/svk-testing', 'getsongs.py'), ('/usr/lib/python2.7', 'htmlentitydefs.py'))
+(('/home/ka2m/Python/svk-testing', 'getsongs.py'), ('/usr/lib/python2.7', 'os.py'))
+(('/home/ka2m/Python/svk-testing', 'getsongs.py'), ('/usr/lib/python2.7', 'sys'))
+(('/home/ka2m/Python/svk-testing', 'getsongs.py'), ('/usr/lib/python2.7', 'urllib2.py'))
+(('/home/ka2m/Python/svk-testing', 'getsongs.py'), ('/usr/lib/python2.7', 'webbrowser.py'))
+(('/home/ka2m/Python/svk-testing', 'getsongs.py'), ('/usr/share/pyshared', 'lxml'))
+(('/home/ka2m/Python/svk-testing', 'getsongs.py'), ('/usr/share/pyshared', 'lxml/html'))
+(('/home/ka2m/Python/svk-testing', 'player.py'), (None, None))
+(('/home/ka2m/Python/svk-testing', 'player.py'), ('/home/ka2m/Python/svk-testing', 'check_id.py'))
+(('/home/ka2m/Python/svk-testing', 'player.py'), ('/home/ka2m/Python/svk-testing', 'check_playlist.py'))
+(('/home/ka2m/Python/svk-testing', 'player.py'), ('/home/ka2m/Python/svk-testing', 'cleaner.py'))
+(('/home/ka2m/Python/svk-testing', 'player.py'), ('/home/ka2m/Python/svk-testing', 'getsongs.py'))
+(('/home/ka2m/Python/svk-testing', 'player.py'), ('/usr/lib/python2.7', 'os.py'))
+(('/home/ka2m/Python/svk-testing', 'player.py'), ('/usr/lib/python2.7', 'sys'))
+(('/home/ka2m/Python/svk-testing', 'player.py'), ('/usr/lib/python2.7', 'thread'))
+(('/home/ka2m/Python/svk-testing', 'player.py'), ('/usr/share/pyshared', 'gobject'))
+(('/home/ka2m/Python/svk-testing', 'player.py'), ('/usr/share/pyshared', 'pygst.py'))
+(('/home/ka2m/Python/svk-testing', 'player.py'), ('/usr/share/pyshared/gst-0.10', 'gst'))
+(('/home/ka2m/Python/svk-testing', 'player.py'), ('/usr/share/pyshared/wx-2.8-gtk2-unicode', 'wx'))
+(('/home/ka2m/Python/svk-testing', 'streamvk.py'), (None, None))
+(('/home/ka2m/Python/svk-testing', 'streamvk.py'), ('/home/ka2m/Python/svk-testing', 'player.py'))
+(('/home/ka2m/Python/svk-testing', 'streamvk.py'), ('/usr/lib/python2.7', 'getopt.py'))
+(('/home/ka2m/Python/svk-testing', 'streamvk.py'), ('/usr/lib/python2.7', 'sys'))
+(('/home/ka2m/Python/svk-testing', 'vkauth2.py'), (None, None))
+(('/home/ka2m/Python/svk-testing', 'vkauth2.py'), ('/usr/lib/python2.7', 'HTMLParser.py'))
+(('/home/ka2m/Python/svk-testing', 'vkauth2.py'), ('/usr/lib/python2.7', 'cookielib.py'))
+(('/home/ka2m/Python/svk-testing', 'vkauth2.py'), ('/usr/lib/python2.7', 'urllib.py'))
+(('/home/ka2m/Python/svk-testing', 'vkauth2.py'), ('/usr/lib/python2.7', 'urllib2.py'))
+(('/home/ka2m/Python/svk-testing', 'vkauth2.py'), ('/usr/lib/python2.7', 'urlparse.py'))
+DEPS:	
+	wxPython
+	wx
+	lxml
+	gstreamer
+	gst 
+	pygst
+	python2.7
