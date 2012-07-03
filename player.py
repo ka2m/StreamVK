@@ -10,13 +10,15 @@ import check_id #checking login and password
 import getsongs #getting playlist
 import check_playlist #forming playlist
 import cleaner #remove stuff
-###
-import thread #for downlaoding 
+
+####
 import pygst 
 pygst.require("0.10") # LET THERE BE MUSIC!
 import gobject 
 gobject.threads_init() 
 import gst
+
+
 class MyAuthDialog(wxDialog):
 	def __init__(self,parent,id,title):
 		wx.Dialog.__init__(self,parent,id,title)
@@ -81,7 +83,9 @@ class MyAuthDialog(wxDialog):
 class MyFrame(wxFrame):
 	def __init__(self,parent,id, title,l,p): # l - login, p -password
 		###variable decaration###
+		##GUI
 		self.size = (360,405)
+		style=wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER ^ wx.MAXIMIZE_BOX
 		self.l = l
 		self.p = p
 		self.token =""
@@ -92,17 +96,17 @@ class MyFrame(wxFrame):
 		self.value = 0.5
 		self.playlist = [('0','0','0','0')]
 		self.dirname = ""
+		## logics
+		self.ListLoaded = False
 		self.eoft = False
 		self.Muted = False
-		style=wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER ^ wx.MAXIMIZE_BOX
+		self.downing = False
 		###end of var dec###
-		
 		#starting frame and drawing it
 		wxFrame.__init__(self,parent,id,title,(wx.SystemSettings.GetMetric(wx.SYS_SCREEN_X),wx.SystemSettings.GetMetric(wx.SYS_SCREEN_Y)),wxSize(self.size[0],self.size[1]),style=style)
 		self.InitUI()
-		self.BindAction()
 		self.epls.Enable(False) #will be ready in 0.5
-		
+		self.downb.Enable(False)
 		###PyGST (Gstreamer) init###
 		self.player = gst.element_factory_make("playbin", "player")
 		fakesink = gst.element_factory_make("fakesink", "fakesink")
@@ -111,12 +115,10 @@ class MyFrame(wxFrame):
    		bus.add_signal_watch()
    		bus.connect("message", self.on_message)
 		self.time_format = gst.Format(gst.FORMAT_TIME)
-		gobject.timeout_add(1000,self.update_time)
-   		####
-
-   		#icon
-   		favicon = wx.Icon(sys.path[0]+'/favicon.png', wx.BITMAP_TYPE_PNG, 64, 64)
-		self.SetIcon(favicon)
+		####Timing
+   		self.timer =wx.Timer(self)
+   		###
+   		self.BindAction()	
 
 	def OnClose(self,event):
 		self.StopM()
@@ -125,7 +127,10 @@ class MyFrame(wxFrame):
 		exit()
 	
 	def InitUI(self):
- 		#init [panel] 
+ 		#icon
+ 		favicon = wx.Icon(sys.path[0]+'/favicon.png', wx.BITMAP_TYPE_PNG, 64, 64)
+		self.SetIcon(favicon)
+		#init [panel] 
 		panel = wx.Panel(self)
 		#self.font
 		self.font = wx.SystemSettings_GetFont(wx.SYS_SYSTEM_FONT)
@@ -197,7 +202,7 @@ class MyFrame(wxFrame):
 		#download
 		self.downb = wx.Button(panel,label=u'\u25bc')
 		self.downb.SetFont(self.font)
-		self.downb.Enable(False)
+		
 		
 		#artist
 		vbox2 = wx.BoxSizer(wx.VERTICAL)
@@ -218,29 +223,19 @@ class MyFrame(wxFrame):
 		self.volmuteb = wx.Button(panel,label="Mute",size=(85,25))
 		self.volmuteb.SetFont(self.font)
 		
-		#position
-		self.tpos = wxStaticText(panel)
-		self.tpos.SetFont(self.font)
-
-		#duration
-		self.tdur = wxStaticText(panel)
-		self.tdur.SetFont(self.font)
-
-
 		#path
 		self.plpath ="Path: "
 		self.pathtext = wxStaticText(panel,label=self.plpath)
 		self.pathtext.SetFont(self.font)
 
 		#sizers
-		self.seekslider = wx.Slider(panel,-1,minValue=0,maxValue=3600,size=(170,15),style=wx.SL_HORIZONTAL)
-		self.seektext = wxStaticText(panel,label="Seek")
+		self.seekslider = wx.Slider(panel,-1,size=(170,15),style=wx.SL_HORIZONTAL)
+		self.tpos = wxStaticText(panel,label="--:--")
+		self.tdur = wxStaticText(panel,label="--:--")
 
 
 		self.volslider = wx.Slider(panel,-1,minValue=0,maxValue=300,value=150,size=(170,15),style=wx.SL_HORIZONTAL)
 		self.volstext = wxStaticText(panel,label="Volume")
-
-
 		
 		###lower space sizers
 		hbox4 = wx.BoxSizer(wx.HORIZONTAL)
@@ -258,15 +253,11 @@ class MyFrame(wxFrame):
 		
 		hbox5 = wx.BoxSizer(wx.HORIZONTAL)
 		hbox5.Add((35,0))
-		hbox5.Add(self.seektext,flag=wx.LEFT,border=1)
+		hbox5.Add(self.tpos,flag=wx.LEFT,border=1)
 		hbox5.Add((30,0))
 		hbox5.Add(self.seekslider,flag=wx.LEFT,border=1)
 		hbox5.Add((30,0))
-		
-		vbox2 = wx.BoxSizer(wx.VERTICAL)
-		vbox2.Add(self.tpos,flag=wx.TOP,border=1)
-		vbox2.Add(self.tdur,flag=wx.TOP,border=1)
-		hbox5.Add(vbox2,flag=wx.LEFT,border=1)
+		hbox5.Add(self.tdur,flag=wx.LEFT,border=1)
 
 
 		hbox6 = wx.BoxSizer(wx.HORIZONTAL)
@@ -277,15 +268,11 @@ class MyFrame(wxFrame):
 		hbox6.Add((5,-10))
 		hbox6.Add(self.volmuteb,flag=wx.LEFT,border=1)
 
-
-
 		vbox.Add(hbox4)
 		vbox.Add((0,10))
 		vbox.Add(hbox5)
 		vbox.Add((0,10))
 		vbox.Add(hbox6)
-
-		
 		
 		###end of elements declaration###
 		panel.SetSizer(vbox)
@@ -310,6 +297,10 @@ class MyFrame(wxFrame):
 		self.preb.Bind(wx.EVT_BUTTON,self.OnPrvPress)
 		self.volmuteb.Bind(wx.EVT_BUTTON,self.OnVolMute)
 		self.volslider.Bind(wx.EVT_SLIDER,self.OnVolUpd)
+		#seeking
+		self.seekslider.Bind(wx.EVT_SLIDER,self.onPosUpd)
+		#timer
+		self.Bind(wx.EVT_TIMER,self.OnTimeUpd,self.timer)
 		#closing
 		self.Bind(wx.EVT_CLOSE, self.OnClose)
 
@@ -332,6 +323,9 @@ class MyFrame(wxFrame):
 			##GUI CHANGE
 			self.player.set_property("uri",self.playlist[self.pos+1][0])
 			self.player.set_state(gst.STATE_PLAYING)
+			self.timer.Start(1000)
+
+
 		else:
 			self.paused = True
 			self.playb.SetLabel(u'\u25b6')
@@ -345,10 +339,17 @@ class MyFrame(wxFrame):
 			self.Next()
 	
 	def StopM(self):
+		###visual
+		self.timer.Stop()
 		atext = "Artist: " 
 		ttext = "Title: "
-		self.artistname.SetLabel(atext)
+		self.tdur.SetLabel("--:--")
+	 	self.tpos.SetLabel("--:--")
+	 	self.seekslider.SetMax(0)
+		self.seekslider.SetValue(0)
+	 	self.artistname.SetLabel(atext)
 		self.titlename.SetLabel(ttext)
+		###visual
 		self.player.set_property("uri", '')
 		self.player.set_state(gst.STATE_NULL)
 		self.playb.SetLabel(u'\u25b6')
@@ -417,7 +418,10 @@ class MyFrame(wxFrame):
 		self.VolMute()
 	def OnVolUpd(self,event):
 		self.VolUpd()
-
+	def OnTimeUpd(self,event):
+		self.UpdateTime()
+	def onPosUpd(self,event):
+		self.UpdatePos()
 	
 	###everything about streaming list	
 	def Streaming(self,event):
@@ -432,16 +436,37 @@ class MyFrame(wxFrame):
 		try: 
 			self.playlist = check_playlist.Check(self.plpath)
 			label ="Path: " + self.Shorter(self.plpath,true)
+			self.ListLoaded = True
 			self.pathtext.SetLabel(label)
 		except RuntimeError:
 			wx.MessageBox('Playlist error. It can be damaged, old format (pre-0.3.1) or not found','WARNING!',wx.OK| wx.ICON_ERROR)
+			self.ListLoaded = False
 		self.FillList()
 	
 	###get list
 	def FillList(self):
-		self.downb.Enable(False)
+		#self.downb.Enable(True)
 		for i in xrange(1,len(self.playlist)):
 			self.playlistbox.Append(self.playlist[i][3])	
+	
+	def Select(self,event):
+		self.pos = self.playlistbox.GetSelection()
+		self.SetMusicText()
+		print self.pos
+		###dummy next-prev check###
+		if self.pos == 0:
+		 self.preb.Enable(False)
+		 self.IsFirst = True
+		else: 
+			self.preb.Enable(True)
+			self.IsFirst = False
+		if self.pos == len(self.playlist)-	2:
+			 self.nextb.Enable(False)
+			 self.IsLast = True
+		else: 
+			self.nextb.Enable(True)
+			self.IsLast = False
+		###dummy next-prev check###
 	#auth
 	
 	def Auth(self,event):
@@ -465,45 +490,35 @@ class MyFrame(wxFrame):
 		self.ecode,self.l, self.p = authd.ReturnValue()
 		authd.Destroy()
 	
+	#file operations
 	def OpenFile(self,event):
 		opendialog = wx.FileDialog(self,"Choose a playlist",self.dirname,"","*.vkpls",wx.OPEN)
-		if opendialog.ShowModal() == wxID_OK:
-			newpath=opendialog.GetPath()
-		opendialog.Destroy()
-		if len(newpath) != 0 or newpath != self.plpath:
-			self.plpath = newpath
-			self.InitPlaylist()
+		res = opendialog.ShowModal() 
+		if res == wxID_OK:
+			self.plpath=opendialog.GetPath()
+			opendialog.Destroy()
+		if res == wxID_CANCEL:
+			opendialog.Destroy()
+			return False
+		self.InitPlaylist()
+		return True
 	
 	def SaveFile(self,event):
-		savedialog = wx.FileDialog(self,"Save your playlist",self.dirname,"","*.vkpls",wx.SAVE)
-		if len(self.plpath) <= 6: wx.MessageBox('No playlist loaded!','WARNING!',wx.OK|wx.ICON_ERROR)
+		savedialog = wx.FileDialog(self,"Save your playlist",self.dirname,".vkpls","*.vkpls",wx.SAVE)
+		if self.ListLoaded == false: wx.MessageBox('No playlist loaded!','WARNING!',wx.OK|wx.ICON_ERROR)
 		else:
-			if savedialog.ShowModal() == wxID_OK:
+			res =savedialog.ShowModal()
+			if res == wxID_OK:
 				savepath=savedialog.GetPath()
-		savedialog.Destroy()
-		if str(savepath).find(".vkpls") == -1:
-			savepath = savepath+".vkpls"
-		savecmd = "cat "+self.plpath+" > "+savepath
-		os.popen(savecmd)
-
-	def Select(self,event):
-		self.pos = self.playlistbox.GetSelection()
-		self.SetMusicText()
-		print self.pos
-		###dummy next-prev check###
-		if self.pos == 0:
-		 self.preb.Enable(False)
-		 self.IsFirst = True
-		else: 
-			self.preb.Enable(True)
-			self.IsFirst = False
-		if self.pos == len(self.playlist)-	2:
-			 self.nextb.Enable(False)
-			 self.IsLast = True
-		else: 
-			self.nextb.Enable(True)
-			self.IsLast = False
-		###dummy next-prev check###
+				if str(savepath).find(".vkpls") == -1:
+					savepath = savepath+".vkpls"
+				savecmd = "cat "+self.plpath+" > "+savepath
+				os.popen(savecmd)
+				savedialog.Destroy()
+			if res == wxID_CANCEL:
+				savedialog.Destroy()
+				return False
+		return True
 		
 	def Shorter(self,text,ispath): #function to check if length is exceeded and change it to abcdef...
 	 	text = text.decode('UTF-8')
@@ -517,18 +532,25 @@ class MyFrame(wxFrame):
 	 	 		return "/.../"+p[-2]+"/"+p[-1] 		
 	 	else: return text
 
-	def update_time(self):
-		if self.player.get_state() == gst.STATE_NULL:
-			self.tdur.SetLabel("NN:NN")
-			self.tpos.SetLabel(self.pos)
-		else:
-			try:
-				durint = self.palyer.query_duration(self.time_format,None)[0]
-				dur = self.convert_ns(durint)
-				self.seekslider.SetRange(0,durint)
-			except:
-				dur =  "--:--"
-			self.tdur.SetLabel(dur)
+	#time/pos operations
+	def UpdateTime(self):
+		pos_i = 0
+		dur_i = 100 #avoid UnboundLocalError: local variable 'dur_i' referenced before assignment 
+		try:
+	 		pos_i = self.player.query_position(self.time_format,None)[0]
+	 		dur_i =  self.player.query_duration(self.time_format,None)[0]	 		
+
+	 	except:
+			pos =  "--:--"				
+			dur = "--:--"
+		self.seekslider.SetMax(dur_i/1000000000)
+		self.seekslider.SetValue(pos_i/1000000000)
+	 	self.SetTimingText(pos_i,self.tpos)
+	 	self.SetTimingText(dur_i-pos_i+1,self.tdur)
+	
+	def SetTimingText(self,num,field):
+		snum = self.convert_ns(num)
+		field.SetLabel(snum)
 	
 	def convert_ns(self, time_int):
 		time_int = time_int / 1000000000
@@ -548,39 +570,50 @@ class MyFrame(wxFrame):
 		else: time_str = time_str + "00:"
 		if time_int > 9: time_str = time_str + str(time_int)
 		else: time_str = time_str + "0" + str(time_int)
+		
 		return time_str
 
-	def DownFile(self,event):
-	 	if self.pos == -1: wx.MessageBox('No selection. Aborting','Attention!',wx.OK|wx.ICON_INFORMATION)
-	 	else: 
-	 		a = self.playlist[self.pos+1][0]
-	 		s = self.playlist[self.pos+1][1]
-	 		s = s[0:-1]+".mp3"
-	 		print a,s
-	 		savedialog = wx.FileDialog(self,"Save your playlist",self.dirname,s,"*.mp3",wx.SAVE)
-			if len(self.plpath) <= 6: wx.MessageBox('No playlist loaded!','WARNING!',wx.OK|wx.ICON_ERROR)
-			else:
-				if savedialog.ShowModal() == wxID_OK:
-					downpath=savedialog.GetDirectory()
-		print downpath
-		savedialog.Destroy()
-	 	thread.start_new_thread(downloadmusic,(a,s,downpath)) #a - url, s - filename, downpath - path to save
+	def UpdatePos(self):
+		val = self.seekslider.GetValue()
+		if self.player.get_state()[1] == gst.STATE_PLAYING or self.player.get_state()[1] == gst.STATE_PAUSED:
+			try:
+				self.player.seek_simple(gst.FORMAT_TIME,gst.SEEK_FLAG_FLUSH | gst.SEEK_FLAG_KEY_UNIT, val * gst.SECOND)
+				self.seekslider.SetValue(val)
+				pos_i = self.player.query_position(self.time_format,None)[0]
+	 			dur_i =  self.player.query_duration(self.time_format,None)[0]	 		
+				self.SetTimingText(pos_i,self.tpos)
+				self.SetTimingText(dur_i-pos_i+1,self.tdur)
+			except gst.QueryError:
+				pass
 
-def downloadmusic(url,filename,downpath,*args): #parallel thread 
-	cmd = "wget -P" + downpath + " " + url 
-	#os.popen(cmd)
-	
-	
-	rpath= rpath+filename
-	
-	try:
-		os.rename(dpath,rpath)
-	except:
-		wx.MessageBox('Can not rename. Leaving original name: '+dpath,'Attenttion!', wx.OK|wx.ICON_ERROR)
+	def DownFile(self,event):
+		if self.ListLoaded == False: wx.MessageBox('Nothing to select.','Attention!',wx.OK|wx.ICON_INFORMATION)
+	 	else: 
+	 		if self.downing == False:
+	 			self.downing = True
+	 			self.downb.SetLabel("Abort")
+	 			url = self.playlist[self.pos+1][0]
+	 			name = self.playlist[self.pos+1][3]
+	 			name = name[0:-1]+".mp3"
+	 			savedialog = wx.FileDialog(self,"Save your playlist",self.dirname,name,"*.mp3",wx.SAVE)
+				res = savedialog.ShowModal() 
+				if res == wxID_OK:
+					downpath=savedialog.GetDirectory()
+				if res == wxID_CANCEL:
+					self.downb.SetLabel(u"\u25bc")
+	 				self.downing = False
+				savedialog.Destroy()	
+		
+
+	 		else:
+	 			
+	 			self.downb.SetLabel(u"\u25bc")
+	 			self.downing = False
+	 			
 def startplayer(l,p):
 	app = wxPySimpleApp()
-	frame = MyFrame(NULL,-1,"\tStreamVK 0.3.1",l,p)
+	frame = MyFrame(NULL,-1,"\tStreamVK 0.3.2",l,p)
 	frame.Show(true)
 	app.MainLoop()
 	exit()
-#startplayer("","")
+startplayer("","")
