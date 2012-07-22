@@ -1,5 +1,5 @@
 StreamVK
-Current: [0.3.1/BETA] [freezed]
+Current: [0.3.3/DEV] [freezed]
 Version LIST:
 0.1 ---- StreamVK using PyCurses non-GUI      [dead]
 0.2 ---- StreamVK based on C++ with ncurses   [dead]
