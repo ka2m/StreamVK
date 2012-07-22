@@ -13,4 +13,6 @@ Dependencies -> depend.txt
  
 Reportme: slp.vld@gmail.com
 
+Other information: http://streamvk.tumblr.com/ or http://ka2m.tumblr.com/
+
 To start: python streamvk.py -h
