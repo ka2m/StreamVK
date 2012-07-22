@@ -50,3 +50,4 @@ DEPS:
 	gst 
 	pygst
 	python2.7
+WARNING: all the next releases will be transfered to PyGObject from wxPython 
