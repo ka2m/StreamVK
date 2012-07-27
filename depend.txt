@@ -43,11 +43,16 @@ WARNING     :   wxPython.wx
 (('/home/ka2m/Python/svk-testing', 'vkauth2.py'), ('/usr/lib/python2.7', 'urllib2.py'))
 (('/home/ka2m/Python/svk-testing', 'vkauth2.py'), ('/usr/lib/python2.7', 'urlparse.py'))
 DEPS:	
-	wxPython
+	wxPython #no more (from wxPython import *, it's really old and dumb) #nothing more to do with it in TESTING/0.5
 	wx
 	lxml
 	gstreamer
 	gst 
 	pygst
 	python2.7
-WARNING: all the next releases will be transfered to PyGObject from wxPython 
+	wget #aaand it's gone
+
+WINDOWS QUESTIONS:
+1) Gstreamer for Windows 
+2) wxWidgets for Windows [available]
+3) lxml 
